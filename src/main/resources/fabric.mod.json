@@ -1,28 +1,25 @@
 {
-	"schemaVersion": 1,
-	"id": "minecraftclient",
-	"version": "${version}",
-	"name": "Minecraft Client",
-	"description": "Custom Minecraft client mod",
-	"authors": [
-		"Your Name"
-	],
-	"contact": {},
-	"license": "MIT",
-	"icon": "assets/minecraftclient/icon.png",
-	"environment": "*",
-	"entrypoints": {
-		"client": [
-			"com.example.client.MinecraftClient"
-		]
-	},
-	"mixins": [
-		"minecraftclient.mixins.json"
-	],
-	"depends": {
-		"fabricloader": ">=${loader_version}",
-		"minecraft": "~1.21.4",
-		"java": ">=21",
-		"fabric-api": "*"
-	}
+  "schemaVersion": 1,
+  "id": "noname",
+  "version": "${version}",
+  "name": "NoName Client",
+  "description": "A Minecraft client focused on beautiful visuals",
+  "authors": ["Hesoyan14"],
+  "contact": {},
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.example.client.NoNameClient"
+    ]
+  },
+  "mixins": [
+    "noname.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.9",
+    "minecraft": "~1.21.4",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
 }

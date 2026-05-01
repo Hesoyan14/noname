@@ -10,6 +10,13 @@ base {
 	archivesName = project.archives_base_name
 }
 
+// Lombok support
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
 repositories {
 	mavenCentral()
 }
@@ -22,6 +29,9 @@ dependencies {
 
 	// Fabric API
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+	// Guava (EventBus) — уже включена в Minecraft, но явно объявим
+	implementation 'com.google.guava:guava:33.0.0-jre'
 }
 
 processResources {
