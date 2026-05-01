@@ -1,0 +1,49 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "itz.silentcore.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "com.llamalad7.mixinextras.MixinExtrasBootstrap",
+  "client": [
+    "AbstractClientPlayerEntityMixin",
+    "BackgroundRendererMixin",
+    "CapeRendererMixin",
+    "ChatInputSuggestorMixin",
+    "ChatHudMixin",
+    "ChatHudLineVisibleMixin",
+    "ChatScreenMixin",
+    "ClientConnectionMixin",
+    "ClientPlayerEntityMixin",
+    "ClientPlayNetworkHandlerMixin",
+    "ClientWorldPropertiesMixin",
+    "EntityMixin",
+    "ExperienceBarMixin",
+    "GameRendererMixin",
+    "HandledScreenMixin",
+    "HealthBarMixin",
+    "HeldItemRendererMixin",
+    "HotbarMixin",
+    "InGameHudMixin",
+    "InGameOverlayRendererMixin",
+    "KeyboardMixin",
+    "LightmapTextureManagerMixin",
+    "LivingEntityMixin",
+    "MinecraftClientMixin",
+    "MouseMixin",
+    "PlayerListHudMixin",
+    "ScoreboardMixin",
+    "ServerListMixin",
+    "TextMixin",
+    "TitleScreenMixin",
+    "accesors.ScreenAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  },
+  "mixins": [
+    "StyleMixin"
+  ]
+}

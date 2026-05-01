@@ -1,0 +1,28 @@
+{
+	"schemaVersion": 1,
+	"id": "minecraftclient",
+	"version": "${version}",
+	"name": "Minecraft Client",
+	"description": "Custom Minecraft client mod",
+	"authors": [
+		"Your Name"
+	],
+	"contact": {},
+	"license": "MIT",
+	"icon": "assets/minecraftclient/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"client": [
+			"com.example.client.MinecraftClient"
+		]
+	},
+	"mixins": [
+		"minecraftclient.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=${loader_version}",
+		"minecraft": "~1.21.4",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}
