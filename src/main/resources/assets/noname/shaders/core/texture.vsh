@@ -1,6 +1,6 @@
 #version 150
 
-#moj_import <silentcore:common.glsl>
+#moj_import <noname:common.glsl>
 
 in vec3 Position; // POSITION_TEXTURE_COLOR vertex attributes
 in vec2 UV0;

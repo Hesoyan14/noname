@@ -1,12 +1,22 @@
 package com.example.client.utils.render;
 
 import com.example.client.utils.render.text.Font;
-import com.google.common.base.Suppliers;
 
 public class Fonts {
-    public static final Font sf_pro = Suppliers.memoize(() ->
-            Font.builder().atlas("sf_pro_regular").data("sf_pro_regular").build()).get();
+    private static Font _sf_pro;
+    private static Font _icons;
 
-    public static final Font icons = Suppliers.memoize(() ->
-            Font.builder().atlas("noname_icons").data("noname_icons").build()).get();
+    public static Font sf_pro() {
+        if (_sf_pro == null) {
+            _sf_pro = Font.builder().atlas("sf_pro_regular").data("sf_pro_regular").build();
+        }
+        return _sf_pro;
+    }
+
+    public static Font icons() {
+        if (_icons == null) {
+            _icons = Font.builder().atlas("noname_icons").data("noname_icons").build();
+        }
+        return _icons;
+    }
 }

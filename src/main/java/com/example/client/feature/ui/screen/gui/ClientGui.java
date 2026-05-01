@@ -20,15 +20,47 @@ import java.util.List;
 
 public class ClientGui extends Screen implements IMinecraft {
 
-    // Размер GUI (398x254 — как в SilentCore)
+    // ── Размеры GUI ──────────────────────────────────────────────────────────
     public static final float GUI_W = 398f;
     public static final float GUI_H = 254f;
 
-    // Анимации открытия
+    // Левая панель
+    private static final float LEFT_X      = 5f;
+    private static final float LEFT_Y      = 5f;
+    private static final float LEFT_W      = 78f;
+    private static final float LEFT_H      = 244f;
+
+    // Правая панель (шапка)
+    private static final float HEADER_X    = 87f;
+    private static final float HEADER_Y    = 5f;
+    private static final float HEADER_W    = 306f;
+    private static final float HEADER_H    = 28f;
+
+    // Область модулей (под шапкой)
+    public static final float MOD_AREA_X   = 87f;
+    public static final float MOD_AREA_Y   = 37f;   // HEADER_Y + HEADER_H + 4
+    public static final float MOD_AREA_W   = 306f;
+    public static final float MOD_AREA_H   = 212f;  // до низа GUI с отступом
+
+    // Нижняя панель профиля
+    private static final float PROFILE_X   = 9.5f;
+    private static final float PROFILE_Y   = 220f;
+    private static final float PROFILE_W   = 69f;
+    private static final float PROFILE_H   = 24f;
+
+    // Логотип — центр левой панели по X, отступ сверху
+    private static final float LOGO_X      = 14f;   // левый край текста
+    private static final float LOGO_Y      = 12f;
+    private static final float LOGO_SIZE   = 18f;
+
+    // Категории — начало Y
+    private static final float CAT_START_Y = 46f;
+    private static final float CAT_STEP    = 26f;
+
+    // ── Анимации ─────────────────────────────────────────────────────────────
     public static final Animation open  = new Animation(400, Easing.EXPO_OUT);
     public static final Animation alpha = new Animation(300, Easing.EXPO_OUT);
 
-    // Текущая выбранная категория
     public static Category currentCategory = Category.COMBAT;
 
     private final List<Component> components = new ArrayList<>();
@@ -37,11 +69,10 @@ public class ClientGui extends Screen implements IMinecraft {
     public ClientGui() {
         super(Text.of("NoName GUI"));
 
-        // Создаём компоненты категорий — Y начинается с 39 (18 + 21)
-        float categoryY = 18f;
+        float y = CAT_START_Y;
         for (Category cat : Category.values()) {
-            categoryY += 21f;
-            components.add(new CategoryComponent(14f, categoryY, cat));
+            components.add(new CategoryComponent(LEFT_X + 4f, y, cat));
+            y += CAT_STEP;
         }
 
         open.setStartValue(0.2f);
@@ -55,7 +86,6 @@ public class ClientGui extends Screen implements IMinecraft {
         open.update();
         alpha.update();
 
-        // Закрываем если анимация закрытия завершена
         if (open.getValue() <= 0.21f && open.isFinished()) {
             super.close();
             return;
@@ -64,7 +94,6 @@ public class ClientGui extends Screen implements IMinecraft {
         MatrixStack ms = context.getMatrices();
         ms.push();
 
-        // Центрируем GUI и применяем scale-анимацию открытия
         float cx = context.getScaledWindowWidth() / 2f;
         float cy = context.getScaledWindowHeight() / 2f;
         ms.translate(cx, cy, 0);
@@ -72,7 +101,6 @@ public class ClientGui extends Screen implements IMinecraft {
         ms.scale(scale, scale, 1f);
         ms.translate(-GUI_W / 2f, -GUI_H / 2f, 0);
 
-        // Трансформируем координаты мыши в локальные
         float lmx = (float) ((mouseX - cx) / scale + GUI_W / 2f);
         float lmy = (float) ((mouseY - cy) / scale + GUI_H / 2f);
         renderContext.setMouseX(lmx);
@@ -80,36 +108,62 @@ public class ClientGui extends Screen implements IMinecraft {
 
         float a = alpha.getValue();
 
-        // --- Фон с блюром ---
-        renderContext.drawBlur(0, 0, GUI_W, GUI_H, 8f, 128f,
-                ColorRGBA.of(30, 30, 30, (int) (255 * a)));
+        // ── Блюр всего фона GUI ───────────────────────────────────────────────
+        renderContext.drawBlur(0, 0, GUI_W, GUI_H, 10f, 8f,
+                ColorRGBA.of(255, 255, 255, (int) (255 * a)));
 
-        // --- Левая панель (категории) ---
-        renderContext.drawStyledRect(5f, 5f, 78f, 244.5f, 6f, a);
+        // ── Тёмный полупрозрачный фон поверх блюра ───────────────────────────
+        renderContext.drawRect(0, 0, GUI_W, GUI_H, 10f,
+                ColorRGBA.of(12, 12, 12, (int) (160 * a)));
 
-        // --- Правая панель (модули) ---
-        renderContext.drawStyledRect(87f, 5f, 306.5f, 24f, 6f, a);
+        // ── Левая панель ──────────────────────────────────────────────────────
+        renderContext.drawStyledRect(LEFT_X, LEFT_Y, LEFT_W, LEFT_H, 8f, a);
 
-        // --- Логотип "i" (иконка клиента) ---
-        renderContext.drawText("i", Fonts.icons, 31f, 11f, 24f,
+        // ── Логотип "//" ──────────────────────────────────────────────────────
+        // Центрируем иконку по ширине левой панели
+        float logoTextW = Fonts.icons().getWidth("i", LOGO_SIZE);
+        float logoX = LEFT_X + (LEFT_W - logoTextW) / 2f;
+        renderContext.drawText("i", Fonts.icons(), logoX, LOGO_Y, LOGO_SIZE,
                 ColorRGBA.of(120, 180, 255, (int) (255 * a)));
 
-        // --- Название текущей категории в шапке ---
-        renderContext.drawText("Y", Fonts.icons, 97.5f, 12.8f, 9f,
-                ColorRGBA.of(233, 233, 233, (int) (255 * 0.45 * a)));
-        renderContext.drawText(currentCategory.getName(), Fonts.sf_pro, 107.5f, 13f, 6.5f,
-                ColorRGBA.of(233, 233, 233, (int) (255 * 0.45 * a)));
+        // ── Разделитель под логотипом ─────────────────────────────────────────
+        renderContext.drawRect(LEFT_X + 8f, CAT_START_Y - 6f, LEFT_W - 16f, 0.5f, 0f,
+                ColorRGBA.of(255, 255, 255, (int) (25 * a)));
 
-        // --- Нижняя панель (профиль) ---
-        renderContext.drawStyledRect(9.5f, 224.5f, 69f, 21f, 4f, a);
-        renderContext.drawRect(14.5f, 229.5f, 12f, 12f, 5.5f,
-                ColorRGBA.of(255, 255, 255, (int) (255 * a)));
-        renderContext.drawText("NoName", Fonts.sf_pro, 28f, 227.5f, 7f, 0.05f,
-                ColorRGBA.of(255, 255, 255, (int) (255 * a)));
-        renderContext.drawText("v1.0.0", Fonts.sf_pro, 28f, 235f, 6f, 0.01f,
-                ColorRGBA.of(255, 255, 255, (int) (255 * a * 0.6f)));
+        // ── Шапка правой панели ───────────────────────────────────────────────
+        renderContext.drawStyledRect(HEADER_X, HEADER_Y, HEADER_W, HEADER_H, 8f, a);
 
-        // --- Компоненты категорий ---
+        // Иконка категории в шапке
+        float headerIconY = HEADER_Y + (HEADER_H - 9f) / 2f - 1f;
+        renderContext.drawText(currentCategory.getIcon(), Fonts.icons(),
+                HEADER_X + 10f, headerIconY, 9f, 0.04f,
+                ColorRGBA.of(233, 233, 233, (int) (255 * 0.55 * a)));
+
+        // Название категории в шапке
+        float headerTextY = HEADER_Y + (HEADER_H - 6.5f) / 2f;
+        renderContext.drawText(currentCategory.getName(), Fonts.sf_pro(),
+                HEADER_X + 23f, headerTextY, 6.5f, 0.04f,
+                ColorRGBA.of(233, 233, 233, (int) (255 * 0.55 * a)));
+
+        // ── Нижняя панель профиля ─────────────────────────────────────────────
+        renderContext.drawStyledRect(PROFILE_X, PROFILE_Y, PROFILE_W, PROFILE_H, 6f, a);
+
+        // Аватар (круглый прямоугольник)
+        float avatarSize = 14f;
+        float avatarX = PROFILE_X + 6f;
+        float avatarY = PROFILE_Y + (PROFILE_H - avatarSize) / 2f;
+        renderContext.drawRect(avatarX, avatarY, avatarSize, avatarSize, avatarSize / 2f,
+                ColorRGBA.of(120, 180, 255, (int) (200 * a)));
+
+        // Имя и версия — вертикально по центру панели
+        float nameX = avatarX + avatarSize + 5f;
+        float nameY = PROFILE_Y + PROFILE_H / 2f - 6f;
+        renderContext.drawText("NoName", Fonts.sf_pro(), nameX, nameY, 6.5f, 0.05f,
+                ColorRGBA.of(255, 255, 255, (int) (255 * a)));
+        renderContext.drawText("v1.0.0", Fonts.sf_pro(), nameX, nameY + 8f, 5.5f, 0.01f,
+                ColorRGBA.of(255, 255, 255, (int) (255 * 0.45 * a)));
+
+        // ── Компоненты категорий ──────────────────────────────────────────────
         components.forEach(c -> c.render(renderContext));
 
         ms.pop();

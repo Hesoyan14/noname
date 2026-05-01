@@ -14,22 +14,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CategoryComponent extends Component {
+
+    // Размеры кнопки категории
+    public static final float W = 70f;
+    public static final float H = 22f;
+
+    // Отступы сетки модулей
+    private static final float MOD_PAD_X  = 4f;
+    private static final float MOD_PAD_Y  = 4f;
+    private static final float MOD_GAP    = 3f;
+    private static final int   MOD_COLS   = 3;
+
     private final Category category;
     private final List<ModuleComponent> moduleComponents = new ArrayList<>();
     private final Animation hoverAnim = new Animation(150, Easing.EXPO_OUT);
     private boolean hovered = false;
-
-    // Размеры кнопки категории в левой панели
-    public static final float W = 78f;
-    public static final float H = 23f;
-
-    // Область модулей: начало X=87, Y=33, ширина=306.5, высота=216.5
-    private static final float MOD_AREA_X = 87f;
-    private static final float MOD_AREA_Y = 33f;
-    private static final float MOD_AREA_W = 306.5f;
-    private static final float MOD_AREA_H = 216.5f;
-    private static final float MOD_COL_W = 103f;
-    private static final int   MOD_COLS   = 3;
 
     public CategoryComponent(float x, float y, Category category) {
         super(x, y);
@@ -45,47 +44,61 @@ public class CategoryComponent extends Component {
         hoverAnim.update();
 
         boolean active = ClientGui.currentCategory == category;
-        float alpha = ClientGui.alpha.getValue();
+        float a = ClientGui.alpha.getValue();
 
-        // Фон кнопки категории
+        // ── Фон кнопки ────────────────────────────────────────────────────────
         if (active) {
             context.drawRect(x, y, W, H, 6f,
-                    ColorRGBA.of(120, 180, 255, (int) (255 * 0.15 * alpha)));
+                    ColorRGBA.of(120, 180, 255, (int) (255 * 0.18 * a)));
+            // Акцентная полоска слева
+            context.drawRect(x, y + 4f, 2.5f, H - 8f, 1.5f,
+                    ColorRGBA.of(120, 180, 255, (int) (255 * 0.9 * a)));
         } else if (hoverAnim.getValue() > 0.01f) {
             context.drawRect(x, y, W, H, 6f,
-                    ColorRGBA.of(255, 255, 255, (int) (255 * 0.05 * alpha * hoverAnim.getValue())));
+                    ColorRGBA.of(255, 255, 255, (int) (255 * 0.06 * a * hoverAnim.getValue())));
         }
 
-        // Цвет иконки и текста
+        // ── Иконка + название ─────────────────────────────────────────────────
         ColorRGBA iconColor = active
-                ? ColorRGBA.of(120, 180, 255, (int) (255 * 0.9 * alpha))
-                : ColorRGBA.of(233, 233, 233, (int) (255 * 0.45 * alpha));
+                ? ColorRGBA.of(120, 180, 255, (int) (255 * 0.95 * a))
+                : ColorRGBA.of(200, 200, 200, (int) (255 * 0.45 * a));
 
-        // Иконка категории
-        context.drawText(category.getIcon(), Fonts.icons, x + 1f, y + 1f, 11f, 0.04f, iconColor);
-        // Название категории
-        context.drawText(category.getName(), Fonts.sf_pro, x + 15f, y + 2.5f, 6.5f, 0.04f, iconColor);
+        // Иконка — вертикально по центру кнопки
+        float iconY = y + (H - 9f) / 2f - 1f;
+        context.drawText(category.getIcon(), Fonts.icons(), x + 6f, iconY, 9f, 0.04f, iconColor);
 
-        // Рендер модулей если эта категория активна
+        // Название — вертикально по центру
+        float textY = y + (H - 6.5f) / 2f;
+        context.drawText(category.getName(), Fonts.sf_pro(), x + 19f, textY, 6.5f, 0.04f, iconColor);
+
+        // ── Модули (только для активной категории) ────────────────────────────
         if (active) {
-            context.getContext().enableScissor(
-                    Math.round(MOD_AREA_X), Math.round(MOD_AREA_Y),
-                    Math.round(MOD_AREA_X + MOD_AREA_W), Math.round(MOD_AREA_Y + MOD_AREA_H));
+            float areaX = ClientGui.MOD_AREA_X;
+            float areaY = ClientGui.MOD_AREA_Y;
+            float areaW = ClientGui.MOD_AREA_W;
+            float areaH = ClientGui.MOD_AREA_H;
 
-            // Раскладываем модули по колонкам
+            context.getContext().enableScissor(
+                    Math.round(areaX), Math.round(areaY),
+                    Math.round(areaX + areaW), Math.round(areaY + areaH));
+
+            // Ширина одной карточки с учётом отступов
+            float colW = (areaW - MOD_PAD_X * 2f - MOD_GAP * (MOD_COLS - 1)) / MOD_COLS;
+
             float[] colY = new float[MOD_COLS];
             for (int c = 0; c < MOD_COLS; c++) {
-                colY[c] = MOD_AREA_Y;
+                colY[c] = areaY + MOD_PAD_Y;
             }
 
             for (int i = 0; i < moduleComponents.size(); i++) {
                 ModuleComponent mc = moduleComponents.get(i);
                 int col = i % MOD_COLS;
-                float mx = MOD_AREA_X + col * MOD_COL_W + 2f;
+                float mx = areaX + MOD_PAD_X + col * (colW + MOD_GAP);
                 mc.setX(mx);
                 mc.setY(colY[col]);
+                mc.setWidth(colW);
                 mc.render(context);
-                colY[col] += ModuleComponent.H + 2f;
+                colY[col] += ModuleComponent.H + MOD_GAP;
             }
 
             context.getContext().disableScissor();

@@ -19,6 +19,14 @@ configurations {
 
 repositories {
 	mavenCentral()
+	// Modrinth Maven — для подключения модов как зависимостей
+	maven {
+		name = "Modrinth"
+		url = "https://api.modrinth.com/maven"
+		content {
+			includeGroup "maven.modrinth"
+		}
+	}
 }
 
 dependencies {
@@ -30,8 +38,22 @@ dependencies {
 	// Fabric API
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	// Guava (EventBus) — уже включена в Minecraft, но явно объявим
+	// Guava (EventBus)
 	implementation 'com.google.guava:guava:33.0.0-jre'
+
+	// ── Встроенные моды (упаковываются в JAR клиента) ────────────────────────
+
+	// Sodium — оптимизация рендера
+	modImplementation include("maven.modrinth:sodium:mc1.21.4-0.6.9-fabric")
+
+	// Iris Shaders — поддержка шейдерпаков (требует Sodium)
+	modImplementation include("maven.modrinth:iris:1.8.4+1.21.4-fabric")
+
+	// Chat Animation [Smooth Chat]
+	modImplementation include("maven.modrinth:chatanimation:1.0.7")
+
+	// Smooth GUI
+	modImplementation include("maven.modrinth:smooth-gui:1.1.1")
 }
 
 processResources {

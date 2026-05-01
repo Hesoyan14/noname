@@ -9,19 +9,21 @@ import com.example.client.utils.render.Fonts;
 import com.example.client.utils.render.RenderContext;
 
 public class ModuleComponent extends Component {
+
+    public static final float H = 36f;   // высота карточки
+    private float width = 96f;           // ширина — задаётся снаружи через setWidth()
+
     private final Module module;
     private final Animation enableAnim = new Animation(200, Easing.EXPO_OUT);
-    private final Animation hoverAnim = new Animation(150, Easing.EXPO_OUT);
+    private final Animation hoverAnim  = new Animation(150, Easing.EXPO_OUT);
     private boolean hovered = false;
-
-    // Размеры карточки модуля
-    public static final float W = 101f;
-    public static final float H = 22f;
 
     public ModuleComponent(float x, float y, Module module) {
         super(x, y);
         this.module = module;
     }
+
+    public void setWidth(float w) { this.width = w; }
 
     @Override
     public void render(RenderContext context) {
@@ -30,49 +32,50 @@ public class ModuleComponent extends Component {
         hoverAnim.animate(hovered ? 1f : 0f);
         hoverAnim.update();
 
-        float alpha = ClientGui.alpha.getValue();
-        float enabledV = enableAnim.getValue();
-        float hoverV = hoverAnim.getValue();
+        float a   = ClientGui.alpha.getValue();
+        float ena = enableAnim.getValue();
+        float hov = hoverAnim.getValue();
 
-        // Фон карточки — стеклянный прямоугольник
-        float rectAlpha = (float) (0.8 + enabledV * 0.7);
-        context.drawStyledRect(x, y, W, H, 6, alpha * rectAlpha);
-
-        // Подсветка при включённом модуле — тонкая цветная полоска слева
-        if (enabledV > 0.01f) {
-            ColorRGBA accent = ColorRGBA.of(120, 180, 255, (int) (255 * alpha * enabledV));
-            context.drawRect(x, y + 4f, 2f, H - 8f, 1f, accent);
-        }
+        // ── Фон карточки ──────────────────────────────────────────────────────
+        context.drawStyledRect(x, y, width, H, 6f, a * (0.8f + ena * 0.4f));
 
         // Подсветка при наведении
-        if (hoverV > 0.01f) {
-            context.drawRect(x, y, W, H, 6f,
-                    ColorRGBA.of(255, 255, 255, (int) (15 * alpha * hoverV)));
+        if (hov > 0.01f) {
+            context.drawRect(x, y, width, H, 6f,
+                    ColorRGBA.of(255, 255, 255, (int) (18 * a * hov)));
         }
 
-        float textAlpha = (float) (0.5 + enabledV * 0.5);
+        // Акцентная полоска слева при включённом модуле
+        if (ena > 0.01f) {
+            context.drawRect(x + 1f, y + 5f, 2f, H - 10f, 1f,
+                    ColorRGBA.of(120, 180, 255, (int) (255 * a * ena)));
+        }
 
-        // Название модуля
-        context.drawText(module.getName(), Fonts.sf_pro,
-                x + 7f, y + 4f, 6.5f, 0.05f,
-                ColorRGBA.of(255, 255, 255, (int) (255 * alpha * textAlpha)));
+        float textAlpha = 0.5f + ena * 0.5f;
 
-        // Описание
-        context.drawText(module.getInfo().description(), Fonts.sf_pro,
-                x + 7f, y + 12f, 5.5f, 0.01f,
-                ColorRGBA.of(255, 255, 255, (int) (255 * alpha * textAlpha * 0.5f)));
+        // ── Название модуля ───────────────────────────────────────────────────
+        context.drawText(module.getName(), Fonts.sf_pro(),
+                x + 8f, y + 8f,
+                6.5f, 0.05f,
+                ColorRGBA.of(255, 255, 255, (int) (255 * a * textAlpha)));
+
+        // ── Описание ──────────────────────────────────────────────────────────
+        context.drawText(module.getInfo().description(), Fonts.sf_pro(),
+                x + 8f, y + 18f,
+                5f, 0.01f,
+                ColorRGBA.of(200, 200, 200, (int) (255 * a * textAlpha * 0.5f)));
     }
 
     @Override
     public void click(double mouseX, double mouseY, int button) {
-        if (isHovered(mouseX, mouseY, W, H)) {
-            if (button == 0) module.cToggle();
+        if (isHovered(mouseX, mouseY, width, H) && button == 0) {
+            module.cToggle();
         }
     }
 
     @Override
     public void moved(double mouseX, double mouseY) {
-        hovered = isHovered(mouseX, mouseY, W, H);
+        hovered = isHovered(mouseX, mouseY, width, H);
     }
 
     public Module getModule() { return module; }
